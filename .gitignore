@@ -1,4 +1,5 @@
 node_modules/
+coverage/
 .DS_Store
 .vscode
 .idea
@@ -6,3 +7,4 @@ node_modules/
 dist
 .cache
 *.sqlite
+temp.js
