@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
+const jwt = require('jsonwebtoken');
 const { User } = require('./db');
+const JWT_SECRET = process.env.JWT_SECRET;
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
@@ -13,14 +15,31 @@ app.get('/', async (req, res, next) => {
       <p>Create a new cat at <b><code>POST /kittens</code></b> and delete one at <b><code>DELETE /kittens/:id</code></b></p>
       <p>Log in via POST /login or register via POST /register</p>
     `);
-  } catch (error) {
-    console.error(error);
-    next(error)
+  } catch (err) {
+    console.error(err);
+    next(err)
   }
 });
 
 // Verifies token with jwt.verify and sets req.user
-// TODO - Create authentication middleware
+
+const setUser = async (req, res, next) => {
+  try {
+    const auth = req.header('Authorization');
+    if (!auth) {
+      next();
+    } else {
+      const [, token] = auth.split(' ');
+      const payload = jwt.verify(token, JWT_ACCESS_SECRET);
+      req.user = payload;
+      next();
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(401).send('Unauthorized');
+    next(err);
+  }
+};
 
 // POST /register
 // OPTIONAL - takes req.body of {username, password} and creates a new user with the hashed password
