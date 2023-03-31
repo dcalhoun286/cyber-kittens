@@ -1,11 +1,12 @@
 const express = require('express');
 const app = express();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const { User } = require('./db');
 const JWT_SECRET = process.env.JWT_SECRET;
-
+const SALT_COUNT = process.env.SALT_COUNT;
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', async (req, res, next) => {
   try {
@@ -42,7 +43,23 @@ const setUser = async (req, res, next) => {
 };
 
 // POST /register
-// OPTIONAL - takes req.body of {username, password} and creates a new user with the hashed password
+
+app.post('/register', async (req, res, next) => {
+
+  try {
+
+    const { username, password } = req.body;
+    const hashedPW = await bcrypt.hash(password, SALT_COUNT);
+    await User.create({ username, password: hashedPW });
+    res.send(`${username} successfully created`);
+
+  } catch (err) {
+
+    console.error(err);
+    next(err);
+
+  }
+});
 
 // POST /login
 // OPTIONAL - takes req.body of {username, password}, finds user by username, and compares the password with the hashed version from the DB
@@ -59,8 +76,8 @@ const setUser = async (req, res, next) => {
 // error handling middleware, so failed tests receive them
 app.use((error, req, res, next) => {
   console.error('SERVER ERROR: ', error);
-  if(res.statusCode < 400) res.status(500);
-  res.send({error: error.message, name: error.name, message: error.message});
+  if (res.statusCode < 400) res.status(500);
+  res.send({ error: error.message, name: error.name, message: error.message });
 });
 
 // we export the app, not listening in here, so that we can run tests
