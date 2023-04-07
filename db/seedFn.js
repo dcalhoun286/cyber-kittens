@@ -11,18 +11,20 @@ const seed = async () => {
     await database.sync({ force: true }); // recreate db
   
     const userArr = await User.bulkCreate(users);
+    const kittenArr = [...kittens];
   
     userArr.forEach(async (user) => {
-      const kittenArr = [...kittens];
-  
+
+      const kitten1 = kittenArr.shift();
+      const kitten2 = kittenArr.shift();
+
       const kittenValues = await Promise.all([
-        Kitten.create({...kittenArr[0], ownerId: user.id}),
-        Kitten.create({...kittenArr[1], ownerId: user.id}),
+        Kitten.create({...kitten1, ownerId: user.id}),
+        Kitten.create({...kitten2, ownerId: user.id}),
       ]);
     
       kittenValues.forEach( async (val) => {
         await user.addKitten(val);
-        kittenArr.shift();
       })
     })
   } catch (err) {
