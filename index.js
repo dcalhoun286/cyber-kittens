@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { User } = require('./db');
+const { User, Kitten } = require('./db');
 const JWT_SECRET = process.env.JWT_SECRET;
 const SALT_COUNT = process.env.SALT_COUNT;
 app.use(express.json());
@@ -44,28 +44,93 @@ const setUser = async (req, res, next) => {
 
 // POST /register
 
-app.post('/register', async (req, res, next) => {
+// app.post('/register', async (req, res, next) => {
+
+//   try {
+
+//     const { username, password } = req.body;
+//     const hashedPW = await bcrypt.hash(password, SALT_COUNT);
+//     await User.create({ username, password: hashedPW });
+//     res.send(`${username} successfully created`);
+
+//   } catch (err) {
+
+//     console.error(err);
+//     next(err);
+
+//   }
+// });
+
+// POST /login
+
+// app.post('/login', async (req, res, next) => {
+//   try {
+
+//     const { username, password } = req.body;
+//     const foundUser = await User.findOne({
+//       where: { username }
+//     });
+
+//     if (!foundUser) {
+//       res.status(401).send('Unauthorized');
+//     } else {
+//       const validPassword = await bcrypt.compare(password, foundUser.password);
+//       if (!validPassword) {
+//         res.status(401).send('Unauthorized');
+//       }
+//       res.status(200).send('Successful login');
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     next(err);
+//   }
+// });
+
+// GET /kittens/:id
+
+app.get('/kittens/:id', setUser, async (req, res, next) => {
 
   try {
 
-    const { username, password } = req.body;
-    const hashedPW = await bcrypt.hash(password, SALT_COUNT);
-    await User.create({ username, password: hashedPW });
-    res.send(`${username} successfully created`);
+    if (!req.user) {
+      res.status(401).send('Unauthorized');
+    } else {
+      const foundKitten = await Kitten.findByPk(req.params.id);
+    }
+
+    const foundKitten = await Kitten.findByPk(req.params.id);
+    if (foundKitten) {
+      res.status(200).send(foundKitten);
+    } else {
+      res.status(404).send('Not found');
+    }
 
   } catch (err) {
-
     console.error(err);
     next(err);
-
   }
+
 });
 
-// POST /login
-// OPTIONAL - takes req.body of {username, password}, finds user by username, and compares the password with the hashed version from the DB
+// GET /kittens
 
-// GET /kittens/:id
-// TODO - takes an id and returns the cat with that id
+app.get('/kittens', async (req, res, next) => {
+
+  try {
+
+    const foundKittens = await Kitten.findAll();
+  
+    if (foundKittens.length) {
+      res.status(200).send(foundKittens);
+    } else {
+      res.status(404).send('Not found');
+    }
+
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
 
 // POST /kittens
 // TODO - takes req.body of {name, age, color} and creates a new cat with the given name, age, and color

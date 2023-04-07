@@ -7,7 +7,7 @@ const SALT_COUNT = 10;
 const {JWT_SECRET} = process.env;
 
 const app = require('./index');
-const { sequelize, Kitten, User } = require('./db');
+const { database, Kitten, User } = require('./db');
 const seed = require('./db/seedFn');
 const {kittens} = require('./db/seedData');
 
@@ -30,7 +30,7 @@ describe('Endpoints', () => {
     let loginResponse;
     
     beforeAll(async () => {
-        await sequelize.sync({ force: true }); // recreate db
+        await database.sync({ force: true }); // recreate db
         await seed();
         registerResponse = await request(app)
             .post('/register')
@@ -102,7 +102,7 @@ describe('Endpoints', () => {
 
     describe('/kittens endpoints', () => {
         beforeEach(async () => {
-            await sequelize.sync({ force: true }); // recreate db
+            await database.sync({ force: true }); // recreate db
             ({token, user} = await createTestUser(testUserData));
             kitten = await Kitten.create({...testKittenData, ownerId: user.id});
         });
