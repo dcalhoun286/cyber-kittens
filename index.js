@@ -31,7 +31,7 @@ const setUser = async (req, res, next) => {
       next();
     } else {
       const [, token] = auth.split(' ');
-      const payload = jwt.verify(token, JWT_ACCESS_SECRET);
+      const payload = jwt.verify(token, JWT_SECRET);
       req.user = payload;
       next();
     }
@@ -96,14 +96,20 @@ app.get('/kittens/:id', setUser, async (req, res, next) => {
       res.status(401).send('Unauthorized');
     } else {
       const foundKitten = await Kitten.findByPk(req.params.id);
+
+      if (foundKitten) {
+
+        if (foundKitten.ownerId === req.user.id) {
+          const { name, age, color } = foundKitten;
+          res.status(200).send({ name, age, color });
+        } else {
+          res.status(401).send('Unauthorized');
+        }
+      } else {
+        res.status(404).send('Not found');
+      }
     }
 
-    const foundKitten = await Kitten.findByPk(req.params.id);
-    if (foundKitten) {
-      res.status(200).send(foundKitten);
-    } else {
-      res.status(404).send('Not found');
-    }
 
   } catch (err) {
     console.error(err);
