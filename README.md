@@ -1,6 +1,9 @@
 # cyber-kittens
 A RESTful API for kittens secured via JWT and bcrypt
 
+## Author
+Dar-Ci Calhoun
+
 ## Getting Started
 
 Start app
