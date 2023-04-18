@@ -14,4 +14,3 @@ Start app
 Run tests
 
     npm test
-This is a test, I will delete later
