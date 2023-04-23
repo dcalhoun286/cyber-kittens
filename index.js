@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { User, Kitten } = require('./db');
 const JWT_SECRET = process.env.JWT_SECRET;
-const SALT_COUNT = process.env.SALT_COUNT;
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -37,7 +37,6 @@ const setUser = async (req, res, next) => {
     }
   } catch (err) {
     console.error(err);
-    res.status(401).send('Unauthorized');
     next(err);
   }
 };
@@ -145,9 +144,7 @@ app.post('/kittens', setUser, async (req, res, next) => {
 
     if (!req.user) {
       res.status(401).send('Unauthorized');
-      next();
-    }
-    else {
+    } else {
       const { name, color, age } = req.body;
       const newKitten = await Kitten.create({ name, color, age });
       res.status(201).send({ name: newKitten.name, age: newKitten.age, color: newKitten.color });
@@ -159,7 +156,25 @@ app.post('/kittens', setUser, async (req, res, next) => {
 });
 
 // DELETE /kittens/:id
-// TODO - takes an id and deletes the cat with that id
+
+app.delete('/kittens/:id', setUser, async (req, res, next) => {
+
+  const kittenToDelete = await Kitten.findByPk(req.params.id);
+
+  try {
+
+    if ((!req.user) || (kittenToDelete.ownerId !== req.user.id)) {
+      res.status(401).send('Unauthorized');
+    } else {
+      await kittenToDelete.destroy();
+      res.sendStatus(204);
+    }
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+
+});
 
 // error handling middleware, so failed tests receive them
 app.use((error, req, res, next) => {
