@@ -12,10 +12,10 @@ const {kittens} = require('./db/seedData');
 
 
 const createTestUser = async (userData) => {
-    const hashed = await bcrypt.hash(userData.password, SALT_COUNT);
-    user = await User.create({ username: userData.username, password: hashed });
+
+    const user = await User.create({ username: userData.username, password: userData.password });
     const {id, username: createdUsername} = user;
-    token = jwt.sign({id, username: createdUsername}, JWT_SECRET);
+    const token = jwt.sign({id, username: createdUsername}, JWT_SECRET);
     return {user, token};
 }
 

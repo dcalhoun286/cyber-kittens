@@ -49,8 +49,7 @@ const setUser = async (req, res, next) => {
 //   try {
 
 //     const { username, password } = req.body;
-//     const hashedPW = await bcrypt.hash(password, SALT_COUNT);
-//     await User.create({ username, password: hashedPW });
+//     await User.create({ username, password });
 //     res.send(`${username} successfully created`);
 
 //   } catch (err) {
