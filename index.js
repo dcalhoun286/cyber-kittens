@@ -138,7 +138,25 @@ app.get('/kittens', async (req, res, next) => {
 });
 
 // POST /kittens
-// TODO - takes req.body of {name, age, color} and creates a new cat with the given name, age, and color
+
+app.post('/kittens', setUser, async (req, res, next) => {
+
+  try {
+
+    if (!req.user) {
+      res.status(401).send('Unauthorized');
+      next();
+    }
+    else {
+      const { name, color, age } = req.body;
+      const newKitten = await Kitten.create({ name, color, age });
+      res.status(201).send({ name: newKitten.name, age: newKitten.age, color: newKitten.color });
+    }
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
 
 // DELETE /kittens/:id
 // TODO - takes an id and deletes the cat with that id
