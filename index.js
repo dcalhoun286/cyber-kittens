@@ -43,46 +43,60 @@ const setUser = async (req, res, next) => {
 
 // POST /register
 
-// app.post('/register', async (req, res, next) => {
+app.post('/register', async (req, res, next) => {
 
-//   try {
+  try {
 
-//     const { username, password } = req.body;
-//     await User.create({ username, password });
-//     res.send(`${username} successfully created`);
+    const { username, password } = req.body;
+    const createUser = await User.create({ username, password });
 
-//   } catch (err) {
+    const user = {
+      id: createUser.id,
+      username: createUser.username,
+    };
 
-//     console.error(err);
-//     next(err);
+    const token = jwt.sign({ user }, JWT_SECRET);
+    res.status(200).send({ message: 'success', token });
 
-//   }
-// });
+  } catch (err) {
+
+    console.error(err);
+    next(err);
+
+  }
+});
 
 // POST /login
 
-// app.post('/login', async (req, res, next) => {
-//   try {
+app.post('/login', async (req, res, next) => {
+  try {
 
-//     const { username, password } = req.body;
-//     const foundUser = await User.findOne({
-//       where: { username }
-//     });
+    const { username, password } = req.body;
+    const foundUser = await User.findOne({
+      where: { username }
+    });
 
-//     if (!foundUser) {
-//       res.status(401).send('Unauthorized');
-//     } else {
-//       const validPassword = await bcrypt.compare(password, foundUser.password);
-//       if (!validPassword) {
-//         res.status(401).send('Unauthorized');
-//       }
-//       res.status(200).send('Successful login');
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     next(err);
-//   }
-// });
+    if (!foundUser) {
+      res.status(401).send('Unauthorized');
+    } else {
+      const validPassword = await bcrypt.compare(password, foundUser.password);
+      if (!validPassword) {
+        res.status(401).send('Unauthorized');
+      }
+
+      const user = {
+        id: foundUser.id,
+        username: foundUser.username,
+      };
+
+      const token = jwt.sign({ user }, JWT_SECRET);
+      res.status(200).send({  message: 'success', token });
+    }
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
 
 // GET /kittens/:id
 
